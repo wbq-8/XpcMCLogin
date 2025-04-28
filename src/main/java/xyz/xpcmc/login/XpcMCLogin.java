@@ -2,8 +2,10 @@ package xyz.xpcmc.login;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -21,7 +23,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 public class XpcMCLogin extends JavaPlugin implements Listener {
@@ -38,26 +43,31 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdirs();
-        }
-
-        loadConfig();
-        loadPlayersData();
-        loadIPData();
-        loadLocations();
-
-        getServer().getPluginManager().registerEvents(this, this);
-
-        // 启动检查未登录玩家的任务
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                checkLoginTimeouts();
+        try {
+            if (!getDataFolder().exists()) {
+                getDataFolder().mkdirs();
             }
-        }.runTaskTimer(this, 20L * 60 * 2, 20L * 60 * 2); // 每2分钟检查一次
 
-        getLogger().info("XpcMCLogin 已启用!");
+            loadConfig();
+            loadPlayersData();
+            loadIPData();
+            loadLocations();
+
+            getServer().getPluginManager().registerEvents(this, this);
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    checkLoginTimeouts();
+                }
+            }.runTaskTimer(this, 20L * 60 * 2, 20L * 60 * 2);
+
+            getLogger().info("XpcMCLogin 已启用!");
+        } catch (Exception e) {
+            getLogger().severe("启动失败: " + e.getMessage());
+            e.printStackTrace();
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
     }
 
     @Override
@@ -69,7 +79,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
 
     private void loadConfig() {
         config = getConfig();
-        config.addDefault("loginTimeout", 120); // 2分钟
+        config.addDefault("loginTimeout", 120);
         config.addDefault("maxAccountsPerIP", 2);
         config.options().copyDefaults(true);
         saveConfig();
@@ -102,6 +112,49 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
         }
     }
 
+    private void loadLocations() {
+        initialJoinLocation = getLocationFromConfig(config.getConfigurationSection("initialJoinLocation"));
+        if (initialJoinLocation == null) {
+            initialJoinLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
+            config.set("initialJoinLocation", serializeLocation(initialJoinLocation));
+            saveConfig();
+        }
+
+        defaultSpawnLocation = getLocationFromConfig(config.getConfigurationSection("defaultSpawnLocation"));
+        if (defaultSpawnLocation == null) {
+            defaultSpawnLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
+            config.set("defaultSpawnLocation", serializeLocation(defaultSpawnLocation));
+            saveConfig();
+        }
+    }
+
+    private Location getLocationFromConfig(ConfigurationSection section) {
+        if (section == null) return null;
+
+        World world = Bukkit.getWorld(section.getString("world"));
+        if (world == null) return null;
+
+        return new Location(
+                world,
+                section.getDouble("x"),
+                section.getDouble("y"),
+                section.getDouble("z"),
+                (float) section.getDouble("yaw"),
+                (float) section.getDouble("pitch")
+        );
+    }
+
+    private Map<String, Object> serializeLocation(Location loc) {
+        Map<String, Object> serialized = new HashMap<>();
+        serialized.put("world", loc.getWorld().getName());
+        serialized.put("x", loc.getX());
+        serialized.put("y", loc.getY());
+        serialized.put("z", loc.getZ());
+        serialized.put("yaw", loc.getYaw());
+        serialized.put("pitch", loc.getPitch());
+        return serialized;
+    }
+
     private void savePlayersData() {
         try {
             playersConfig.save(playersFile);
@@ -123,20 +176,6 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
         }
     }
 
-    private void loadLocations() {
-        if (config.contains("initialJoinLocation")) {
-            initialJoinLocation = (Location) config.get("initialJoinLocation");
-        } else {
-            initialJoinLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-
-        if (config.contains("defaultSpawnLocation")) {
-            defaultSpawnLocation = (Location) config.get("defaultSpawnLocation");
-        } else {
-            defaultSpawnLocation = Bukkit.getWorlds().get(0).getSpawnLocation();
-        }
-    }
-
     private boolean isPlayerLoggedIn(Player player) {
         return loggedInPlayers.contains(player.getName());
     }
@@ -151,7 +190,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
         if (storedHash != null && PasswordHasher.verifyPassword(password, storedHash)) {
             loggedInPlayers.add(player.getName());
 
-            Location lastLocation = (Location) playersConfig.get(player.getName() + ".lastLocation");
+            Location lastLocation = getLocationFromConfig(playersConfig.getConfigurationSection(player.getName() + ".lastLocation"));
             if (lastLocation != null) {
                 new BukkitRunnable() {
                     @Override
@@ -169,7 +208,6 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
 
     private void registerPlayer(Player player, String password) {
         if (playersConfig.contains(player.getName())) {
-            // 已注册，视为重置密码
             String newHash = PasswordHasher.hashPassword(password);
             playersConfig.set(player.getName() + ".password", newHash);
             savePlayersData();
@@ -177,7 +215,6 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
             return;
         }
 
-        // 检查IP限制
         InetAddress ip = player.getAddress().getAddress();
         int accounts = ipAccounts.getOrDefault(ip, 0);
         int maxAccounts = config.getInt("maxAccountsPerIP", 2);
@@ -189,7 +226,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
 
         String hashedPassword = PasswordHasher.hashPassword(password);
         playersConfig.set(player.getName() + ".password", hashedPassword);
-        playersConfig.set(player.getName() + ".lastLocation", player.getLocation());
+        playersConfig.createSection(player.getName() + ".lastLocation", serializeLocation(player.getLocation()));
         savePlayersData();
 
         ipAccounts.put(ip, accounts + 1);
@@ -200,7 +237,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
     }
 
     private void checkLoginTimeouts() {
-        long timeout = config.getLong("loginTimeout", 120) * 1000; // 转换为毫秒
+        long timeout = config.getLong("loginTimeout", 120) * 1000;
         long currentTime = System.currentTimeMillis();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -227,7 +264,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
                 }
             }.runTask(this);
         } else {
-            Location lastLocation = (Location) playersConfig.get(player.getName() + ".lastLocation");
+            Location lastLocation = getLocationFromConfig(playersConfig.getConfigurationSection(player.getName() + ".lastLocation"));
             if (lastLocation != null) {
                 new BukkitRunnable() {
                     @Override
@@ -243,7 +280,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (isPlayerLoggedIn(player)) {
-            playersConfig.set(player.getName() + ".lastLocation", player.getLocation());
+            playersConfig.createSection(player.getName() + ".lastLocation", serializeLocation(player.getLocation()));
             savePlayersData();
         }
         loggedInPlayers.remove(player.getName());
@@ -367,7 +404,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
 
             Player player = (Player) sender;
             defaultSpawnLocation = player.getLocation();
-            config.set("defaultSpawnLocation", defaultSpawnLocation);
+            config.set("defaultSpawnLocation", serializeLocation(defaultSpawnLocation));
             saveConfig();
             player.sendMessage("§a默认重生点已设置!");
             return true;
@@ -384,7 +421,7 @@ public class XpcMCLogin extends JavaPlugin implements Listener {
 
             Player player = (Player) sender;
             initialJoinLocation = player.getLocation();
-            config.set("initialJoinLocation", initialJoinLocation);
+            config.set("initialJoinLocation", serializeLocation(initialJoinLocation));
             saveConfig();
             player.sendMessage("§a初始加入位置已设置!");
             return true;

@@ -1,10 +1,8 @@
-# 登录超时时间(秒)
+# 安全设置
 loginTimeout: 120
-
-# 每个IP允许的最大账号数
 maxAccountsPerIP: 2
 
-# 初始加入位置(自动生成)
+# 位置设置
 initialJoinLocation:
   world: world
   x: 0.0
@@ -13,7 +11,6 @@ initialJoinLocation:
   yaw: 0.0
   pitch: 0.0
 
-# 默认重生点(自动生成)
 defaultSpawnLocation:
   world: world
   x: 0.0
