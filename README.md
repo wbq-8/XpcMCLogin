@@ -1,12 +1,18 @@
 # XpcMCLogin - Minecraft 服务器登录插件
 
-![License](https://img.shields.io/badge/License-GPLv3-blue)
-![Version](https://img.shields.io/badge/Version-1.0.0-green)
-![Spigot](https://img.shields.io/badge/Spigot-1.20%2B-orange)
+![许可证](https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-GPLv3-blue)
+![版本](https://img.shields.io/badge/%E7%89%88%E6%9C%AC-1.0.0-green)
+![Spigot及其分支](https://img.shields.io/badge/Spigot%E5%8F%8A%E5%85%B6%E5%88%86%E6%94%AF-1.20%2B-orange)
 
 ## 📖 简介
 
 XpcMCLogin 是一个轻量级、安全可靠的 Minecraft 服务器登录插件，专为 Spigot 1.20+ 服务器设计。它提供了完整的账号注册、登录系统，并包含多项安全保护措施。
+
+## 📚 版本规划
+- **Alpha版（内测版）**：编译成功、放入服务器，启动服务器时无报错的版本
+- **Beat版（公测版）**：编译成功、放入服务器，启动服务器时无报错、基本功能正常的版本
+- **RC版（准稳定版）**：编译成功、放入服务器，启动服务器时无报错、基本功能正常、细节部分正常的版本
+- **Release版（稳定版）**：不会出现bug、全部功能正常的版本
 
 ## ✨ 功能特性
 
