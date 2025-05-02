@@ -2,23 +2,17 @@ name: XpcMCLogin
 version: 1.0.0
 main: xyz.xpcmc.login.XpcMCLogin
 api-version: 1.20
-author: YourName
 commands:
   l:
-    description: 登录账号
-    aliases: [login]
+    description: Login command
+    usage: /l <password>
   reg:
-    description: 注册账号
-    aliases: [register]
-  xpcsetspawn:
-    description: 设置默认重生点
-    permission: xpclogin.admin
-  xpcsetjoin:
-    description: 设置初始加入位置
-    permission: xpclogin.admin
-  xpcloginother:
-    description: 强制登录其他玩家
+    description: Register command
+    usage: /reg <password> <confirm password>
+  l-to:
+    description: Force login for another player
+    usage: /l-to <player>
 permissions:
-  xpclogin.admin:
-    description: 允许使用XpcMCLogin管理命令
+  xpcmclogin.admin:
+    description: Admin permissions for XpcMCLogin
     default: op

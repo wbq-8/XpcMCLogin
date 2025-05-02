@@ -1,0 +1,34 @@
+# 繁體中文語言文件
+
+# 通用消息
+command.player_only: "§c只有玩家才能執行此指令!"
+
+# 登入相關
+login:
+  usage: "§c用法: /l <密碼>"
+  already_logged_in: "§a您已經登入了!"
+  not_registered: "§c您還沒有註冊，請使用/reg <密碼> <確認密碼>進行註冊"
+  wrong_password: "§c密碼錯誤!"
+  success: "§a登入成功!"
+
+# 註冊相關
+register:
+  usage: "§c用法: /reg <密碼> <確認密碼>"
+  already_registered: "§c您已經註冊過了，請使用/l <密碼>登入"
+  password_mismatch: "§c兩次輸入的密碼不一致!"
+  success: "§a註冊成功! 您已自動登入"
+
+# 強制登入相關
+lto:
+  usage: "§c用法: /l-to <玩家名稱>"
+  feature_disabled: "§c強制登入功能未啟用"
+  player_not_found: "§c找不到指定的玩家"
+  already_logged_in: "§c該玩家已經登入了"
+  success_sender: "§a您已強制玩家 %player% 登入"
+  success_target: "§a玩家 %player% 已強制您登入"
+
+# 限制相關
+restrictions:
+  command_blocked: "§c請先登入後再使用指令!"
+  inventory_blocked: "§c請先登入後再操作物品欄!"
+  block_interaction_blocked: "§c請先登入後再與世界互動!"

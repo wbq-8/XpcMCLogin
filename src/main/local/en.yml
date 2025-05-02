@@ -1,0 +1,34 @@
+# English Language File
+
+# General Messages
+command.player_only: "§cThis command can only be executed by players!"
+
+# Login Related
+login:
+  usage: "§cUsage: /l <password>"
+  already_logged_in: "§aYou are already logged in!"
+  not_registered: "§cYou are not registered yet, please use /reg <password> <confirm password> to register"
+  wrong_password: "§cWrong password!"
+  success: "§aLogin successful!"
+
+# Registration Related
+register:
+  usage: "§cUsage: /reg <password> <confirm password>"
+  already_registered: "§cYou are already registered, please use /l <password> to login"
+  password_mismatch: "§cPasswords do not match!"
+  success: "§aRegistration successful! You have been automatically logged in"
+
+# Force Login Related
+lto:
+  usage: "§cUsage: /l-to <player>"
+  feature_disabled: "§cForce login feature is disabled"
+  player_not_found: "§cTarget player not found"
+  already_logged_in: "§cThat player is already logged in"
+  success_sender: "§aYou have forced %player% to login"
+  success_target: "§aPlayer %player% has forced you to login"
+
+# Restrictions Related
+restrictions:
+  command_blocked: "§cPlease login before using commands!"
+  inventory_blocked: "§cPlease login before accessing your inventory!"
+  block_interaction_blocked: "§cPlease login before interacting with the world!"
