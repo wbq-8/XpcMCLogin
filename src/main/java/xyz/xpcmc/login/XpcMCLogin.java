@@ -3,7 +3,10 @@ package xyz.xpcmc.login;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,18 +30,19 @@ public class XpcMCLogin extends JavaPlugin {
             getDataFolder().mkdir();
         }
 
+        // 加载配置
+        saveDefaultConfig();
+        reloadConfig();
+        currentLanguage = getConfig().getString("language", "en");
+
         // 创建本地化文件夹
         File localFolder = new File(getDataFolder(), "local");
         if (!localFolder.exists()) {
             localFolder.mkdir();
         }
 
-        // 加载或创建语言文件
+        // 加载语言文件
         loadLanguageFiles(localFolder);
-
-        // 加载配置
-        saveDefaultConfig();
-        reloadConfig();
 
         // 初始化登录管理器
         loginManager = new LoginManager(this);
@@ -51,7 +55,7 @@ public class XpcMCLogin extends JavaPlugin {
         // 注册事件监听器
         getServer().getPluginManager().registerEvents(loginManager, this);
 
-        // 加载已登录玩家数据
+        // 加载玩家数据
         loginManager.loadPlayerData();
 
         getLogger().info("XpcMCLogin has been enabled!");
@@ -59,9 +63,7 @@ public class XpcMCLogin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // 保存玩家数据
         loginManager.savePlayerData();
-
         getLogger().info("XpcMCLogin has been disabled!");
     }
 
@@ -71,37 +73,28 @@ public class XpcMCLogin extends JavaPlugin {
         for (String lang : languages) {
             File langFile = new File(localFolder, lang + ".yml");
 
-            // 如果文件不存在，从JAR中复制
             if (!langFile.exists()) {
                 try (InputStream in = getResource("local/" + lang + ".yml")) {
                     if (in != null) {
                         Files.copy(in, langFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                        getLogger().info("Created language file: " + langFile.getName());
-                    } else {
-                        getLogger().warning("Could not find language file in JAR: local/" + lang + ".yml");
                     }
                 } catch (IOException e) {
-                    getLogger().warning("Failed to create language file: " + langFile.getName());
-                    e.printStackTrace();
+                    getLogger().warning("Failed to create language file: " + lang);
                 }
             }
 
-            // 加载语言文件
             languageFiles.put(lang, YamlConfiguration.loadConfiguration(langFile));
         }
 
-        // 设置当前语言
-        currentLanguage = getConfig().getString("language", "en");
         messages = languageFiles.getOrDefault(currentLanguage, languageFiles.get("en"));
-
-        if (messages == null) {
-            getLogger().warning("Failed to load language: " + currentLanguage + ", falling back to en");
-            messages = languageFiles.get("en");
-        }
     }
 
     public String getMessage(String key) {
-        return messages.getString(key, "Missing message: " + key);
+        return messages.getString(key, "§cMissing message: " + key);
+    }
+
+    public void removeBlindness(Player player) {
+        player.removePotionEffect(PotionEffectType.BLINDNESS);
     }
 
     public LoginManager getLoginManager() {

@@ -1,14 +1,10 @@
-# XpcMCLogin 配置文件
+# XpcMCLogin Configuration
 
-# 插件语言 (en, zh_cn, zh_tw)
-language: zh_cn
+language: en
 
-# 插件功能设置
 features:
-  # 强制登录功能 (/l-to)
   force_login: false
 
-  # 自定义初始位置 (玩家第一次进入服务器时的位置)
   custom_initial_location:
     enabled: false
     location:
@@ -19,7 +15,6 @@ features:
       yaw: 0.0
       pitch: 0.0
 
-  # 自定义重生点位置 (登录后的位置)
   custom_spawn_location:
     enabled: false
     location:
