@@ -1,7 +1,7 @@
 # XpcMCLogin - Minecraft 服务器登录插件
 
 ![许可证](https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-GPLv3-blue)
-![版本](https://img.shields.io/badge/%E7%89%88%E6%9C%AC-1.0.0-green)
+![版本](https://img.shields.io/badge/%e6%ba%90%e4%bb%a3%e7%a0%81%e7%89%88%e6%9c%ac%ef%bc%88%e6%9c%80%e6%96%b0%ef%bc%89-1.0.0_Alpha-green)
 ![Spigot及其分支](https://img.shields.io/badge/Spigot%E5%8F%8A%E5%85%B6%E5%88%86%E6%94%AF-1.20%2B-orange)
 
 ## 📖 简介

@@ -9,9 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class XpcMCLogin extends JavaPlugin {
 
@@ -70,15 +70,18 @@ public class XpcMCLogin extends JavaPlugin {
 
         for (String lang : languages) {
             File langFile = new File(localFolder, lang + ".yml");
+
+            // 如果文件不存在，从JAR中复制
             if (!langFile.exists()) {
                 try (InputStream in = getResource("local/" + lang + ".yml")) {
                     if (in != null) {
-                        Files.copy(in, langFile.toPath());
+                        Files.copy(in, langFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        getLogger().info("Created language file: " + langFile.getName());
                     } else {
-                        getLogger().warning("Could not find language file: " + lang + ".yml in jar");
+                        getLogger().warning("Could not find language file in JAR: local/" + lang + ".yml");
                     }
                 } catch (IOException e) {
-                    getLogger().warning("Failed to create language file: " + lang + ".yml");
+                    getLogger().warning("Failed to create language file: " + langFile.getName());
                     e.printStackTrace();
                 }
             }
@@ -90,6 +93,11 @@ public class XpcMCLogin extends JavaPlugin {
         // 设置当前语言
         currentLanguage = getConfig().getString("language", "en");
         messages = languageFiles.getOrDefault(currentLanguage, languageFiles.get("en"));
+
+        if (messages == null) {
+            getLogger().warning("Failed to load language: " + currentLanguage + ", falling back to en");
+            messages = languageFiles.get("en");
+        }
     }
 
     public String getMessage(String key) {
